@@ -35,7 +35,7 @@ public class TokenFilter implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		// TODO Auto-generated method stub
-		String token = request.getParameter("token");
+		/*String token = request.getParameter("token");
 		String url = request.getRequestURI();
 		if(url.matches("(/[a-zA-Z0-9\\-]*)*("+delFioterURL.replace(",", ")[a-zA-Z0-9\\-]*(/[a-zA-Z0-9\\-]*)*|(/[a-zA-Z0-9\\-]*)*(")+")[a-zA-Z0-9\\-]*(/[a-zA-Z0-9\\-]*)*")){//过滤不做校验
 			System.out.println("校验通过");
@@ -43,7 +43,8 @@ public class TokenFilter implements HandlerInterceptor{
 		}else{
 			System.out.println("校验没通过");
 			return false;
-		}
+		}*/
+		return true;
 	}
 
 }
