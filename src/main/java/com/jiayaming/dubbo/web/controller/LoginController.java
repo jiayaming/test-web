@@ -118,41 +118,41 @@ public class LoginController {
 	 * @return
 	 */
 	public Map<String,Object> login(String username,String password,String valuuid,String valiCode,HttpServletRequest request,HttpSession httpSession) {
+		Map<String,Object> returnMap = new HashMap<String,Object>();
 		boolean restr = true;
-		int errorCount = httpSession.getAttribute("sessionValidateCode"+username)==null ? 0:(int)httpSession.getAttribute("sessionValidateCode"+username);
+		int errorCount = httpSession.getAttribute("errorCount"+username)==null ? 0:(int)httpSession.getAttribute("errorCount"+username);
 		if(errorCount > 2){
 			restr = loginValidationCode(valiCode,valuuid,request,httpSession);
+			if(!restr){
+				returnMap.put("state", "failed");
+				returnMap.put("message", "验证码错误");
+				return returnMap;
+			}
 		}
 		
-		Map<String,Object> returnMap = new HashMap<String,Object>();
-		if(restr){
-			Map<String,Object> param = new HashMap<String,Object>();
-			param.put("onCheckInfo", username);
-			param.put("password", password);
-			
-			Map<String, Object> map = new HashMap<>();
-			try {
-				map = customerService.validatePasswordByUserInfo(param);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(map!=null&&(boolean)map.get("userValidateFlag")){
-				String token =UUID.randomUUID().toString();
-				httpSession.setAttribute(token, map);
-				if(errorCount>0){
-					httpSession.removeAttribute("sessionValidateCode"+username);
-				}
-				return returnMap;
-			}else{
-				errorCount += 1;
-				httpSession.setAttribute("sessionValidateCode"+username, errorCount);
-				returnMap.put("errorCount", errorCount);
+		
+		Map<String,Object> param = new HashMap<String,Object>();
+		param.put("customerInfo", username);
+		param.put("password", password);
+		
+		Map<String, Object> map = new HashMap<>();
+		try {
+			map = customerService.validatePasswordByUserInfo(param);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(map!=null&&(boolean)map.get("userValidateFlag")){
+			String token =UUID.randomUUID().toString();
+			httpSession.setAttribute(token, map);
+			if(errorCount>0){
+				httpSession.removeAttribute("sessionValidateCode"+username);
 			}
 			return returnMap;
 		}else{
-			returnMap.put("vcflag", "false");
-			return returnMap;
+			errorCount++;
+			httpSession.setAttribute("errorCount"+username, errorCount);
+			returnMap.put("errorCount", errorCount);
 		}
+		return returnMap;
 	}
 }
