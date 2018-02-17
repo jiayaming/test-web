@@ -52,7 +52,7 @@
     	<mvc:interceptor>
     		<mvc:mapping path="/**/*Controller/**"/>
     		<bean class="com.jiayaming.dubbo.web.comm.TokenFilter">
-    			<property name="delFioterURL" value="login,noLoginController/*"></property>
+    			<property name="delFioterURL" value="loginController/*,noLoginAccessController/*"></property>
     		</bean>
     	</mvc:interceptor>
     </mvc:interceptors>
