@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class TokenFilter implements HandlerInterceptor{
 
 	private String delFioterURL;
@@ -55,7 +57,12 @@ public class TokenFilter implements HandlerInterceptor{
 				request.getSession().setAttribute(token, customerInfo.toString());
 				return true;
 			}else {
-				response.setStatus(415);
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("state", "successe");
+				jsonObject.put("code", "100");
+				jsonObject.put("message", "非法的token");
+				response.setHeader("content-type", "application/json;charset=UTF-8");
+				response.getWriter().append(jsonObject.toString());
 				return false;
 			}
 		}
