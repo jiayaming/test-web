@@ -20,20 +20,14 @@ public class CustomerInfoController {
 	
 	@RequestMapping(value = "onlineState", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> onlineState(HttpServletRequest request,HttpSession httpSession) {
+	public Map<String, Object> onlineState(HttpServletRequest request,HttpSession httpSession) throws Exception {
 		Map<String, Object> returnMap = new HashMap<>();
-		try{
-			String token = request.getHeader("Authorization");
-			String customerInfoStr = httpSession.getAttribute(token).toString();
-			JSONObject customerInfo = JSONObject.parseObject(customerInfoStr);
-			returnMap.put("state", "successe");
-			returnMap.put("token", token);
-	    	returnMap.put("customerInfo", customerInfo);
-			return returnMap;
-		}catch (Exception e) {
-			e.printStackTrace();
-			returnMap.put("state", "fail");
-			return returnMap;
-		}
+		String token = request.getHeader("Authorization");
+		String customerInfoStr = httpSession.getAttribute(token).toString();
+		JSONObject customerInfo = JSONObject.parseObject(customerInfoStr);
+		returnMap.put("state", "successe");
+		returnMap.put("token", token);
+    	returnMap.put("customerInfo", customerInfo);
+		return returnMap;
 	}
 }
