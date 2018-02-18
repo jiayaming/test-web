@@ -361,4 +361,18 @@ public class LoginController {
 		}
 		
 	}
+	
+	@RequestMapping(value = "outLogin", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String,Object> outLogin(HttpServletRequest request,HttpSession httpSession) throws Exception{
+		Map<String,Object> returnMap = new HashMap<String,Object>();
+		String token = request.getHeader("Authorization");
+		Object customerInfo = httpSession.getAttribute(token);
+		if(customerInfo != null && token != null) {
+			httpSession.removeAttribute(token);
+		}
+		returnMap.put("state", "successe");
+		returnMap.put("code", "0");//没有错误
+		return returnMap;
+	}
 }
