@@ -186,6 +186,7 @@ public class LoginController {
 			customerInfo.put("adressProvince", map.get("adressProvince"));
 			customerInfo.put("adressCity", map.get("adressCity"));
 			customerInfo.put("adressCounty", map.get("adressCounty"));
+			customerInfo.put("customerType", map.get("customerType"));
 			String customerInfoStr = customerInfo.toString();
 			request.getSession().setAttribute(token, customerInfoStr);
 			
