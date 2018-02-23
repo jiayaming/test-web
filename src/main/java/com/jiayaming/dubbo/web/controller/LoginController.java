@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
@@ -54,15 +53,14 @@ public class LoginController {
 	 * @param valiCode
 	 * @param valuuid
 	 * @param request
-	 * @param httpSession
 	 * @return
 	 */
-	public boolean loginValidationCode(String valiCode,String valuuid,HttpSession httpSession) {
+	public boolean loginValidationCode(String valiCode,String valuuid,HttpServletRequest request) {
 		try{
 			String sessionValidateCode = "";
 			boolean valFlag = false;
-			if(httpSession.getAttribute("sessionValidateCode"+valuuid)!=null){
-				sessionValidateCode = httpSession.getAttribute("sessionValidateCode"+valuuid).toString();
+			if(request.getSession().getAttribute("sessionValidateCode"+valuuid)!=null){
+				sessionValidateCode = request.getSession().getAttribute("sessionValidateCode"+valuuid).toString();
 				if(!"".equals(valiCode)&&null!=valiCode){
 					String cv = conversionLetter(valiCode);
 					String scv = conversionLetter(sessionValidateCode);
@@ -80,25 +78,24 @@ public class LoginController {
 			return false;
 		}finally {
 			//每次校验后验证码都删除
-			httpSession.removeAttribute("sessionValidateCode"+valuuid);
+			request.getSession().removeAttribute("sessionValidateCode"+valuuid);
 		}
 	}
 	/**
 	 * 获取验证码
 	 * @param request
 	 * @param valuuid
-	 * @param httpSession
 	 * @return
 	 */
 	@RequestMapping(value = "loginGetValiCode", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> getValidationCode(HttpServletRequest request,HttpSession httpSession) {
+	public Map<String, Object> getValidationCode(HttpServletRequest request) {
 		Map<String, Object> returnMap = new HashMap<>();
 		String valuuid = UUID.randomUUID().toString();
 		try{
 			Map<String, Object> map = new HashMap<String, Object>();
 			map = customerService.getValidateCodePicture();
-			httpSession.setAttribute("sessionValidateCode"+valuuid, map.get("validateCode"));
+			request.getSession().setAttribute("sessionValidateCode"+valuuid, map.get("validateCode"));
 			returnMap.put("state", "successe");
 			returnMap.put("valuuid", valuuid);
 			returnMap.put("validateCodePicture", map.get("validateCodePicture").toString());
@@ -116,12 +113,11 @@ public class LoginController {
 	 * @param valuuid
 	 * @param valiCode
 	 * @param request
-	 * @param httpSession
 	 * @return
 	 */
 	@RequestMapping(value = "login", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String,Object> login(@RequestBody JSONObject jsonObject,HttpServletRequest request,HttpSession httpSession) {
+	public Map<String,Object> login(@RequestBody JSONObject jsonObject,HttpServletRequest request) {
 		Map<String,Object> returnMap = new HashMap<String,Object>();
 		if(!jsonObject.containsKey("username")||jsonObject.getString("username").equals("")) {
 			return returnMap;
@@ -135,7 +131,7 @@ public class LoginController {
 		
 		try {
 			boolean restr = true;
-			int errorCount = httpSession.getAttribute("errorCount"+username)==null ? 0:(int)httpSession.getAttribute("errorCount"+username);
+			int errorCount = request.getSession().getAttribute("errorCount"+username)==null ? 0:(int)request.getSession().getAttribute("errorCount"+username);
 			if(errorCount > 2){
 				if(!jsonObject.containsKey("valuuid")||jsonObject.getString("valuuid").equals("")) {
 					return returnMap;
@@ -146,7 +142,7 @@ public class LoginController {
 				
 				String valuuid = jsonObject.getString("valuuid");
 				String valiCode = jsonObject.getString("valiCode");
-				restr = loginValidationCode(valiCode,valuuid,httpSession);
+				restr = loginValidationCode(valiCode,valuuid,request);
 				if(!restr){
 					returnMap.put("state", "failed");
 					returnMap.put("code", "3");//验证码错误
@@ -164,7 +160,7 @@ public class LoginController {
 			
 			if(map.get("state").toString().equals("failed")) {
 				errorCount++;
-				httpSession.setAttribute("errorCount"+username, errorCount);
+				request.getSession().setAttribute("errorCount"+username, errorCount);
 				
 				if(errorCount > 2) {
 					returnMap.put("state", "failed");
@@ -191,10 +187,10 @@ public class LoginController {
 			customerInfo.put("adressCity", map.get("adressCity"));
 			customerInfo.put("adressCounty", map.get("adressCounty"));
 			String customerInfoStr = customerInfo.toString();
-			httpSession.setAttribute(token, customerInfoStr);
+			request.getSession().setAttribute(token, customerInfoStr);
 			
 			if(errorCount>0){
-				httpSession.removeAttribute("errorCount"+username);
+				request.getSession().removeAttribute("errorCount"+username);
 			}
 			
 			returnMap.put("state", "successe");
@@ -217,12 +213,11 @@ public class LoginController {
 	 * 游客注册接口
 	 * @param jsonObject
 	 * @param request
-	 * @param httpSession
 	 * @return
 	 */
 	@RequestMapping(value = "registerInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String,Object> registerInfo(@RequestBody JSONObject jsonObject,HttpSession httpSession) {
+	public Map<String,Object> registerInfo(@RequestBody JSONObject jsonObject,HttpServletRequest request) {
 		Map<String,Object> returnMap = new HashMap<String,Object>();
 		if(!jsonObject.containsKey("username")||jsonObject.getString("username").equals("")) {
 			return returnMap;
@@ -270,7 +265,7 @@ public class LoginController {
 			
 			boolean restr = true;
 			
-			restr = loginValidationCode(valiCode,valuuid,httpSession);
+			restr = loginValidationCode(valiCode,valuuid,request);
 			if(!restr){
 				returnMap.put("state", "failed");
 				returnMap.put("code", "2");//验证码错误
@@ -288,7 +283,7 @@ public class LoginController {
 			customerInfo.put("username", username);
 			customerInfo.put("password", password);
 			
-			httpSession.setAttribute("registerInfo"+randomStr6, customerInfo.toString());
+			request.getSession().setAttribute("registerInfo"+randomStr6, customerInfo.toString());
 			
 			//邮箱发送randomStr6开始
 			System.out.println(randomStr6);
@@ -313,7 +308,7 @@ public class LoginController {
 	
 	@RequestMapping(value = "validRegisterInfo", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String,Object> validRegisterInfo(@RequestBody JSONObject jsonObject,HttpSession httpSession) {
+	public Map<String,Object> validRegisterInfo(@RequestBody JSONObject jsonObject,HttpServletRequest request) {
 		Map<String,Object> returnMap = new HashMap<String,Object>();
 		if(!jsonObject.containsKey("validCode")||jsonObject.getString("validCode").equals("")) {
 			return returnMap;
@@ -321,7 +316,7 @@ public class LoginController {
 		String validCode = jsonObject.getString("validCode");
 
 		try {
-			Object object = httpSession.getAttribute("registerInfo"+validCode);
+			Object object = request.getSession().getAttribute("registerInfo"+validCode);
 			if(object == null) {
 				returnMap.put("state", "failed");
 				returnMap.put("code", "1");//普通错误
@@ -364,12 +359,12 @@ public class LoginController {
 	
 	@RequestMapping(value = "outLogin", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String,Object> outLogin(HttpServletRequest request,HttpSession httpSession) throws Exception{
+	public Map<String,Object> outLogin(HttpServletRequest request) throws Exception{
 		Map<String,Object> returnMap = new HashMap<String,Object>();
 		String token = request.getHeader("Authorization");
-		Object customerInfo = httpSession.getAttribute(token);
+		Object customerInfo = request.getSession().getAttribute(token);
 		if(customerInfo != null && token != null) {
-			httpSession.removeAttribute(token);
+			request.getSession().removeAttribute(token);
 		}
 		returnMap.put("state", "successe");
 		returnMap.put("code", "0");//没有错误

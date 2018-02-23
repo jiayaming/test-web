@@ -2,10 +2,8 @@ package com.jiayaming.dubbo.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +18,10 @@ public class CustomerInfoController {
 	
 	@RequestMapping(value = "onlineState", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> onlineState(HttpServletRequest request,HttpSession httpSession) throws Exception {
+	public Map<String, Object> onlineState(HttpServletRequest request) throws Exception {
 		Map<String, Object> returnMap = new HashMap<>();
 		String token = request.getHeader("Authorization");
-		String customerInfoStr = httpSession.getAttribute(token).toString();
+		String customerInfoStr = request.getSession().getAttribute(token).toString();
 		JSONObject customerInfo = JSONObject.parseObject(customerInfoStr);
 		returnMap.put("state", "successe");
 		returnMap.put("token", token);
