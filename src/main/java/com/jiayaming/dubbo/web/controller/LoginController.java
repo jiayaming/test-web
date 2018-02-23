@@ -370,4 +370,25 @@ public class LoginController {
 		returnMap.put("code", "0");//没有错误
 		return returnMap;
 	}
+	
+	@RequestMapping(value = "onlineState", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> onlineState(HttpServletRequest request) throws Exception {
+		Map<String, Object> returnMap = new HashMap<>();
+		String token = request.getHeader("Authorization");
+		Object customerInfo = request.getSession().getAttribute(token);
+		
+		if(customerInfo != null && token != null) {
+			JSONObject customerInfo1 = JSONObject.parseObject(customerInfo.toString());
+			returnMap.put("state", "successe");
+			returnMap.put("code", "0");//没有错误
+			returnMap.put("token", token);
+	    	returnMap.put("customerInfo", customerInfo1);
+		}else {
+			returnMap.put("state", "failed");
+			returnMap.put("code", "0");//没有错误
+		}
+		
+		return returnMap;
+	}
 }

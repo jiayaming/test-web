@@ -24,6 +24,7 @@ public class CustomerInfoController {
 		String customerInfoStr = request.getSession().getAttribute(token).toString();
 		JSONObject customerInfo = JSONObject.parseObject(customerInfoStr);
 		returnMap.put("state", "successe");
+		returnMap.put("code", "0");//没有错误
 		returnMap.put("token", token);
     	returnMap.put("customerInfo", customerInfo);
 		return returnMap;
